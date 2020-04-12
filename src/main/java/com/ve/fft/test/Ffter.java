@@ -18,8 +18,8 @@ public class Ffter {
 
     }
 
-    private void initRecorder(int len) {
-        complexesList = new List[len];
+    private void initRecorder(int length) {
+        complexesList = new List[length];
         for (int i = 0; i < complexesList.length; i++) {
             complexesList[i] = new ArrayList<>();
         }
@@ -29,32 +29,34 @@ public class Ffter {
         complexesList[complexes.length - 1].addAll(Arrays.asList(complexes));
     }
 
-    public Complex[] fft(Complex[] x) {
-        initRecorder(x.length);
-        return fftIpml(x);
+    public Complex[] fft(Complex[] seq) {
+        initRecorder(seq.length);
+        return fftIpml(seq);
     }
 
-    private Complex[] fftIpml(Complex[] x) {
-        int length = x.length;
+    private Complex[] fftIpml(Complex[] seq) {
+        int length = seq.length;
 
         if (length == 1) {
-            recordStep(x);
-            return x;
+            recordStep(seq);
+            return seq;
         }
 
-        Complex[] evenDftResult = fftIpml(getEvenComplexes(x));//偶数
-
-        Complex[] oddDftResult = fftIpml(getOddComplexes(x));//奇数
+        //对输入进行偶奇分解。
+        Complex[] evenDftResult = fftIpml(getEvenComplexes(seq));//偶数
+        Complex[] oddDftResult = fftIpml(getOddComplexes(seq));//奇数
 
 
         // 偶数+奇数
         Complex[] result = new Complex[length];
         for (int k = 0; k < length / 2; k++) {
-            Complex W = complexW(length, k);    //获取旋转因子
-            Complex Wx = W.multiply(oddDftResult[k]);//旋转因子乘以 奇数的值
+            Complex wNkm = WNkm(length, k);    //获取旋转因子
+            Complex Wx = wNkm.multiply(oddDftResult[k]);//旋转因子乘以 奇数的值
 
 
             result[k] = evenDftResult[k].add(Wx);//偶数+奇数
+
+            //利用旋转因子的对称性得到另外一半
             result[k + length / 2] = evenDftResult[k].minus(Wx);//偶数-奇数
         }
         recordStep(result);
@@ -62,26 +64,26 @@ public class Ffter {
     }
 
 
-    // 使用欧拉公式展开
-    private Complex complexW(int length, int k) {
-        double p = -2 * k * Math.PI / length;
+    //WNkm: 使用欧拉公式展开为复数表示
+    private Complex WNkm(int N, int k) {
+        double p = -2 * k * Math.PI / N;
         return new Complex(Math.cos(p), Math.sin(p));
     }
 
-    private Complex[] getOddComplexes(Complex[] x) {
-        int length = x.length;
+    private Complex[] getOddComplexes(Complex[] seq) {
+        int length = seq.length;
         Complex[] odd = new Complex[length / 2];        //可以复用偶数的那个数组
         for (int k = 0; k < length / 2; k++) {
-            odd[k] = x[2 * k + 1];
+            odd[k] = seq[2 * k + 1];
         }
         return odd;
     }
 
-    private Complex[] getEvenComplexes(Complex[] x) {
-        int length = x.length;
+    private Complex[] getEvenComplexes(Complex[] seq) {
+        int length = seq.length;
         Complex[] even = new Complex[length / 2];
         for (int k = 0; k < length / 2; k++) {
-            even[k] = x[2 * k];
+            even[k] = seq[2 * k];
         }
         return even;
     }

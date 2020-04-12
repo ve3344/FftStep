@@ -43,16 +43,16 @@ public class Sequences {
 
     }
 
-    public static Complex[] dk(int n) {
+    public static Complex[] dk(int n) {//冲激序列
         return generate(n, integer -> new Complex(integer == 0 ? 1 : 0));
     }
 
-    public static Complex[] rk(int n) {
+    public static Complex[] rk(int n) {//矩形序列
         return generate(n, integer -> new Complex(1));
 
     }
 
-    public static Complex[] tk(int n) {
+    public static Complex[] tk(int n) {//梯度序列
         return generate(n, Complex::new);
 
     }
